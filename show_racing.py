@@ -13,32 +13,20 @@ from IPython.display import HTML, display
 import subprocess
 from rich import print  
 
-if len(sys.argv) < 2:
-    print("[bold red]ERRO: Número de timesteps não especificado![/bold red]")
-    sys.exit(1)
+def find_latest_model(timesteps: int) -> Path:
 
-TIMESTEPS = int(sys.argv[1])
-current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    folder = Path("./models")
+    pattern = f"best_model_from_{timesteps}_*.zip"
+    candidates = list(folder.glob(pattern))
 
-print("\n[bold cyan]========== INICIANDO EXIBIÇÃO DE RESULTADOS ==========[/bold cyan]")
-MODEL_PATH = "./models/best_model.zip"
+    if not candidates:
+        print(f"[bold red]ERRO: Nenhum modelo encontrado no padrão '{pattern}' em {folder}[/bold red]")
+        sys.exit(1)
 
-if not os.path.exists(MODEL_PATH):
-    print("[bold red]ERRO: Arquivo 'best_model.zip' não encontrado em ./models/![/bold red]")
-    sys.exit(1)
+    latest = max(candidates, key=lambda x: x.stat().st_mtime)
+    return latest
 
-print(f"[bold yellow]Carregando modelo:[/bold yellow] {MODEL_PATH}")
-
-best_model = PPO.load(MODEL_PATH)
-
-eval_env = DummyVecEnv([lambda: Monitor(gym.make("CarRacing-v3"))])
-
-mean_reward, std_reward = evaluate_policy(best_model, eval_env, n_eval_episodes=5, deterministic=False)
-print(f"[bold magenta]Melhor modelo - Recompensa média:[/bold magenta] {mean_reward:.2f} +/- {std_reward:.2f}")
-
-video_filename = f"car_racing_{TIMESTEPS}_{current_time}"
-
-def record_video(env_id, model, video_length=1000, prefix=video_filename, video_folder="videos/"):
+def record_video(env_id, model, video_length=1000, prefix="car_racing_video", video_folder="videos/"):
     print("\n[bold cyan]========== GRAVANDO O VÍDEO ==========[/bold cyan]")
     eval_env = DummyVecEnv([lambda: Monitor(gym.make(env_id, render_mode="rgb_array"))])
     eval_env = VecVideoRecorder(
@@ -57,7 +45,7 @@ def record_video(env_id, model, video_length=1000, prefix=video_filename, video_
     eval_env.close()
     print(f"[bold yellow]Vídeo salvo como:[/bold yellow] {prefix}.mp4 em {video_folder}")
 
-def show_videos(video_path="videos", prefix=video_filename):
+def show_videos(video_path="videos", prefix="car_racing_video"):
     html = []
     video_file = None
     for mp4 in Path(video_path).glob(f"{prefix}*.mp4"):
@@ -71,15 +59,39 @@ def show_videos(video_path="videos", prefix=video_filename):
         )
         video_file = mp4
 
-    display(HTML("<br>".join(html)))
+    if html:
+        display(HTML("<br>".join(html)))
 
     if video_file:
-        print(f"[bold yellow]Executando vídeo:[/bold yellow] {video_file}")
-        subprocess.run(["xdg-open", str(video_file)])
+        print(f"[bold yellow]Executando vídeo local:[/bold yellow] {video_file}")
+        try:
+            subprocess.run(["xdg-open", str(video_file)])
+        except FileNotFoundError:
+            pass
+
+if len(sys.argv) < 2:
+    print("[bold red]ERRO: Número de timesteps não especificado![/bold red]")
+    sys.exit(1)
+
+TIMESTEPS = int(sys.argv[1])
+current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+print("\n[bold cyan]========== INICIANDO EXIBIÇÃO DE RESULTADOS ==========[/bold cyan]")
+
+model_path = find_latest_model(TIMESTEPS)
+print(f"[bold yellow]Carregando modelo:[/bold yellow] {model_path}")
+
+best_model = PPO.load(str(model_path))
+
+eval_env = DummyVecEnv([lambda: Monitor(gym.make("CarRacing-v3"))])
+
+mean_reward, std_reward = evaluate_policy(best_model, eval_env, n_eval_episodes=5, deterministic=False)
+print(f"[bold magenta]Melhor modelo - Recompensa média:[/bold magenta] {mean_reward:.2f} +/- {std_reward:.2f}")
+
+video_filename = f"car_racing_{TIMESTEPS}_{current_time}"
 
 record_video("CarRacing-v3", best_model, video_length=1000, prefix=video_filename)
 print("\n[bold cyan]========== EXIBINDO O VÍDEO ==========[/bold cyan]")
-display(HTML(f"<h3>Vídeo - {video_filename}</h3>"))
 show_videos("videos", prefix=video_filename)
 
 print("[bold green]========== EXIBIÇÃO CONCLUÍDA ==========[/bold green]")
