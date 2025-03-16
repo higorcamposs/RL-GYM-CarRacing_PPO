@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from datetime import datetime
-from rich import print  
+from rich import print 
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.callbacks import EvalCallback
@@ -17,11 +17,12 @@ if len(sys.argv) < 10:
     print("[bold red]ERRO: Parâmetros insuficientes![/bold red]")
     sys.exit(1)
 
-TIMESTEPS = int(sys.argv[1])       
-EVAL_FREQ = int(sys.argv[2])       
-VERBOSE = int(sys.argv[3])         
-BATCH_SIZE = int(sys.argv[4])      
-LEARNING_RATE = float(sys.argv[5]) 
+TIMESTEPS = int(sys.argv[1])
+EVAL_FREQ = int(sys.argv[2])
+VERBOSE = int(sys.argv[3])
+BATCH_SIZE = int(sys.argv[4])
+LEARNING_RATE = float(sys.argv[5])
+
 MIN_SPEED = float(sys.argv[6])
 PENALTY_CONTRAMAO = float(sys.argv[7])
 PENALTY_OFFROAD = float(sys.argv[8])
@@ -50,7 +51,7 @@ eval_env = Monitor(eval_env)
 eval_env = DummyVecEnv([lambda: eval_env])
 eval_env = VecTransposeImage(eval_env)
 
-env = make_training_env() 
+env = make_training_env()
 eval_callback = EvalCallback(
     eval_env,
     best_model_save_path="./models/",
@@ -63,6 +64,10 @@ eval_callback = EvalCallback(
 model = PPO(
     "CnnPolicy",
     env,
+    clip_range=0.3,
+    ent_coef=0.01,
+    gae_lambda=0.95,
+    vf_coef=0.8,
     verbose=VERBOSE,
     batch_size=BATCH_SIZE,
     learning_rate=LEARNING_RATE,
@@ -84,6 +89,10 @@ if os.path.exists(best_model_src):
     print(f"[bold green]Melhor modelo copiado para:[/bold green] {best_model_dest}")
 else:
     print("[bold red]AVISO:[/bold red] Nenhum 'best_model.zip' encontrado no EvalCallback.")
+
+del model
+env.close()
+eval_env.close()
 
 with open(log_filename, "w") as log_file:
     log_file.write(f"INICIO: {start_datetime}\n")
