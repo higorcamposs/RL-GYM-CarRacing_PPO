@@ -12,6 +12,8 @@ O objetivo é fazer com que o carro permaneça na pista, evite sair para a área
 - 📂 models/ - Armazena os modelos treinados
 - 📂 logs/ - Contém logs do treinamento e tensorboard
 - 📂 videos/ - Guarda gravações dos modelos treinados
+- 📜 install.sh - Script de instalação das dependências 
+- 📜 requirements.txt - Lista de bibliotecas necessárias
 - 📜 main.py - Script principal que gerencia o fluxo de execução
 - 📜 ppo_train.py - Script responsável pelo treinamento do agente
 - 📜 show_racing.py - Script que carrega e exibe o desempenho do agente
