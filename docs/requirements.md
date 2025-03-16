@@ -1,10 +1,10 @@
-# 📦 Dependências do Projeto
+# Dependências do Projeto
 
 Este projeto utiliza diversas bibliotecas para **treinamento de agentes** no ambiente **CarRacing-v3** com **Stable-Baselines3**. Abaixo está um resumo do papel de cada uma.
 
 ---
 
-## 🏎️ Bibliotecas Principais
+## Bibliotecas Principais
 
 | Biblioteca            | Descrição |
 |-----------------------|-----------|
@@ -15,7 +15,7 @@ Este projeto utiliza diversas bibliotecas para **treinamento de agentes** no amb
 
 ---
 
-## 📊 Bibliotecas para Visualização e Debug
+## Bibliotecas para Visualização e Debug
 
 | Biblioteca          | Descrição |
 |--------------------|-----------|
@@ -25,7 +25,7 @@ Este projeto utiliza diversas bibliotecas para **treinamento de agentes** no amb
 
 ---
 
-## 🎥 Bibliotecas para Processamento de Vídeo e Imagem
+## Bibliotecas para Processamento de Vídeo e Imagem
 
 | Biblioteca        | Descrição |
 |------------------|-----------|
@@ -35,7 +35,7 @@ Este projeto utiliza diversas bibliotecas para **treinamento de agentes** no amb
 
 ---
 
-## 🔍 Bibliotecas de Debug e Output
+## Bibliotecas de Debug e Output
 
 | Biblioteca        | Descrição |
 |------------------|-----------|
